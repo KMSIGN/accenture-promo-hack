@@ -1,10 +1,13 @@
 .dataset {
+    display: block;
     font-size: 11pt;
     font-family: Arial;
     border-collapse: collapse;
     background: #efefef;
     border: 1px solid silver;
     width: 100%;
+    margin: 4px;
+    overflow-x: scroll;
 }
 
 .dataset td,

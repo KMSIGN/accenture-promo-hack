@@ -1,18 +1,19 @@
-from typing import Any, Dict
+from os import lseek
+from typing import Any, Dict, List, Union
 from pandas.core.frame import DataFrame
 from sklearn.linear_model import Lasso
 import random
-from numpy.random import multinomial
+from numpy.random import multinomial, rand
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from joblib import dump, load
 import numpy as np
 import pandas as pd
+import math
 
-
-sales_path: str = "../data/sales_history.csv"
-promo_path: str = "../data/promo_history.xlsx"
+sales_path: str = "./data/sales_history.csv"
+promo_path: str = "./data/promo_history.xlsx"
 
 promo = pd.read_excel(promo_path, index_col=0)
 sales = pd.read_csv(sales_path, index_col=0)
@@ -106,11 +107,23 @@ for itemid in promo_sum['skutertiaryid'].unique():
                         week_sales.iloc[0]['soldpieces'] /
                         normal_sold[row['skutertiaryid']]
                     ])
-                    last_week = int(row['start_week'])
                 else:
-                    train_data_list.append([int(row['skutertiaryid']), 0, int(row['start_year']), int(
-                        i), 0,                                    np.nan,                                    np.nan])
+                    train_data_list.append([int(row['skutertiaryid']), 0, int(row['start_year']),
+                                            int(i), 0, np.nan, np.nan])
+        last_week = int(row['start_week'])
         train_data_list.append(row.values)
+    if last_week < 53:
+        for i in range(last_week+1, 53+1):
+            train_data_list.append([
+                int(row['skutertiaryid']),
+                0,
+                int(row['start_year']),
+                int(i),
+                0,
+                week_sales.iloc[0]['soldpieces'],
+                week_sales.iloc[0]['soldpieces'] /
+                normal_sold[row['skutertiaryid']]
+            ])
 train_data: DataFrame = pd.DataFrame(
     train_data_list, columns=promo_sum.columns)
 
@@ -147,38 +160,56 @@ for itemid in items:
         soldpieces_med[itemid][week] = sales_item[sales_item['week']
                                                   == week]['soldpieces'].median()
 
-max_sale = {}  # нужно в глобал
+max_sale: Dict[Any, float] = {}  # нужно в глобал
 for itemid in items:
     max_sale[itemid] = promo_sum[promo_sum['skutertiaryid']
                                  == itemid]['chaindiscountvalue'].max()
 
+item_avalible_sales = {}  # нужно в глобал
+for itemid in items:
+    item_avalible_sales[itemid] = [
+        np.around(i, decimals=2) for i in np.arange(0, max_sale[itemid], 0.05)]
 
-def get_random_distribution(n, all_sum, s=random.random()):  # нужно в глобал
+
+# нужно в глобал
+def get_random_sale_for_item(itemid: Any) -> List[float]:
+    return item_avalible_sales[itemid][random.randint(0, len(item_avalible_sales[itemid])-1)]
+
+
+# нужно в глобал
+def get_random_distribution(n: int, all_sum: int, s: float = random.random()) -> List:
     return np.random.multinomial(all_sum, np.random.dirichlet(np.ones(n)*s))
 
 
-def predict(itemid, next_revenue, seed=random.random(), tries=10):
-    test_data = []
+# нужно в глобал
+def predict(itemid: int, next_revenue: int, seed: float = random.random(), tries: int = 10) -> pd.DataFrame:
+    test_data_list: List[List[Any]] = []
     for week in weeks:
-        test_data.append([random.uniform(0, max_sale[itemid]),
-                         soldpieces_med[itemid][week], week, itemid])
-    test_data = pd.DataFrame(test_data,
-                             columns=['chaindiscountvalue', 'soldpieces', 'start_week', 'skutertiaryid'])
+        test_data_list.append([
+            soldpieces_med[itemid][week],
+            week,
+            itemid
+        ])
+    test_data = pd.DataFrame(test_data_list,
+                             columns=['soldpieces', 'start_week', 'skutertiaryid'])
 
     tries_dict = {}
     for i in range(tries):
         test_data['revenue'] = get_random_distribution(
             len(weeks), next_revenue, seed)
+        test_data['chaindiscountvalue'] = [get_random_sale_for_item(itemid)
+                                           for itemid in test_data['skutertiaryid']]
         X = list(zip(test_data['chaindiscountvalue'], test_data['soldpieces'],
-                 test_data['revenue'], test_data['start_week'], lenc.transform(test_data['skutertiaryid'])))
+                     test_data['revenue'], test_data['start_week'], lenc.transform(test_data['skutertiaryid'])))
         predict_result = reg.predict(X)
         tries_dict[np.sum(predict_result)] = predict_result
 
     test_data['sold_added'] = tries_dict[np.max(list(tries_dict.keys()))]
+    test_data['revenue'] = test_data['revenue'].apply(
+        lambda x: np.around(x, decimals=math.floor(-1 * len(str(next_revenue))/2)))
     test_data['soldpieces'] = (
-        test_data['soldpieces'] * test_data['sold_added']).astype(int)
+        test_data['soldpieces'] * (1 + test_data['sold_added'])).astype(int)
 
     return test_data
 
-
-predict(7182, pow(10, 10), seed=0.01, tries=1000)
+#print(predict(7182, pow(10, 10), seed=0.01, tries=100))

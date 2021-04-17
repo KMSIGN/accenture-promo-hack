@@ -1,0 +1,8 @@
+{% extends 'promo/index.html' %}
+
+{% block title %}Result of prediction{% endblock %}
+
+{% block body %}
+    {{ table |safe }}
+    {{ chart |safe }}
+{% endblock %}

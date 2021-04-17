@@ -2,7 +2,7 @@ from plotly.offline import plot
 import plotly.graph_objs as go
 
 
-def get_plot():
+def get_plot(pl_name):
 
     fig = go.Figure()
     scatter = go.Scatter(x=[0, 1, 2, 3], y=[0, 1, 2, 3],

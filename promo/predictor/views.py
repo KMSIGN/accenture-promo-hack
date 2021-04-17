@@ -238,16 +238,18 @@ def index(request):
             new_r = df[["chaindiscountvalue"]].T
             new_r.index = [int(df.iloc[0]['skutertiaryid']),]
             gen_stat = gen_stat.append(new_r)
-        gen_stat.to_csv("../data/teeeeessstt.csv")
 
         out_tbs = {}
         for i, v in stats.items():
             out_tbs[i] = v.to_html(classes=['dataset'])
 
-        x = [f'Product №{i}' for i in range(10)]
+        x = [f'Product №{i}' for i in gen_df['skutertiaryid'].unique()]
+        gen_df['item_def'] = gen_df['soldpieces'] - gen_df['soldpieces'] * gen_df['sold_added']
+        gen_df['item_inc'] = gen_df['soldpieces'] * gen_df['sold_added']
+
         fig = go.Figure()
-        fig.add_trace(go.Bar(x=x, y=gen_df['soldpieces'] - gen_df['soldpieces'] * gen_df['sold_added'], name="Default trend"))
-        fig.add_trace(go.Bar(x=x, y=gen_df['soldpieces'] * gen_df['sold_added'], name="Added sales"))
+        fig.add_trace(go.Bar(x=x, y=gen_df.groupby('skutertiaryid')["item_def"].sum(), name="Default trend"))
+        fig.add_trace(go.Bar(x=x, y=gen_df.groupby('skutertiaryid')["item_inc"].sum(), name="Added sales"))
         fig.update_layout(
             barmode='stack',
             xaxis_title="Sold pieces",

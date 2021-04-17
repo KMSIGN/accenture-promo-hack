@@ -3,7 +3,7 @@
 {% block title %}Prediction form{% endblock %}
 
 {% block body %}
-  <form method="post"> {% csrf_token %}
+  <form class="mt-4" method="post"> {% csrf_token %}
   <div class="mb-3">
     <label for="budget" class="form-label">Budget</label>
     <input type="number" class="form-control" id="budget" name="budget" aria-describedby="budget">

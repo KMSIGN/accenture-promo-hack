@@ -3,15 +3,14 @@
 {% block title %}Upload statistic{% endblock %}
 
 {% block body %}
-    <form action="/">
+    <form method="post" enctype="multipart/form-data">{% csrf_token %}
         <select class="form-select" aria-label="Default select example">
-            <option selected>Open this select menu</option>
             <option value="Promo history">Promo history</option>
             <option value="Sales history">Sales history</option>
         </select>
         <div>
             <label for="formFileLg" class="form-label">Data input</label>
-            <input class="form-control form-control-lg" id="formFileLg" type="file" accept=".csv, .xlsx">
+            <input class="form-control form-control-lg" id="formFileLg" name="myfile" type="file" accept=".csv, .xlsx">
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>

@@ -60,14 +60,13 @@
             <div class="col-1"></div>
         </div>
     </div>
+</div>
 
-    {% if show_popup %}
-    <script>
-        alert('{% block modal_text %}{% endblock %}')
-
-
-    </script>
-    {% endif %}
+{% if show_popup %}
+<script>
+    alert('{{ modal_text }}')
+</script>
+{% endif %}
 
 </body>
 </html>

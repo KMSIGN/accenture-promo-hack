@@ -1,0 +1,25 @@
+.dataset {
+    display: block;
+    font-size: 11pt;
+    font-family: Arial;
+    border-collapse: collapse;
+    background: #efefef;
+    border: 1px solid silver;
+    width: 100%;
+    margin: 4px;
+    overflow-x: scroll;
+}
+
+.dataset td,
+th {
+    padding: 5px;
+}
+
+.dataset tr:nth-child(even) {
+    background: #E0E0E0;
+}
+
+.dataset tr:hover {
+    background: silver;
+    cursor: pointer;
+}

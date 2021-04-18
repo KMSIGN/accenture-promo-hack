@@ -1,0 +1,17 @@
+{% extends 'promo/index.html' %}
+
+{% block title %}Upload statistic{% endblock %}
+
+{% block body %}
+    <form class="mt-4" method="post" enctype="multipart/form-data">{% csrf_token %}
+        <select class="form-select" name="type" aria-label="Default select example">
+            <option value="Promo history">Promo history</option>
+            <option value="Sales history">Sales history</option>
+        </select>
+        <div>
+            <label for="formFileLg" class="form-label">Data input</label>
+            <input class="form-control form-control-lg" id="formFileLg" name="myfile" type="file" accept=".csv, .xlsx">
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
+    </form>
+{% endblock %}

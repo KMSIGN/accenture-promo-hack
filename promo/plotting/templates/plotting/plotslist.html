@@ -1,0 +1,17 @@
+{% extends 'promo/index.html' %}
+
+{% block title %}Charts list{% endblock %}
+
+{% block body %}
+    {% for chart in chart_list %}
+            <div class="card mt-3">
+              <div class="card-header">
+                  {{ chart.name}}
+              </div>
+              <div class="card-body">
+                <p class="card-text">{{ chart.desc }}</p>
+                <a href="{{ chart.url }}" class="btn btn-primary">Details</a>
+              </div>
+            </div>
+    {% endfor %}
+{% endblock %}

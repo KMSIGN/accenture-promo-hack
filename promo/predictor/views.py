@@ -8,6 +8,7 @@ from numpy.random import multinomial
 from sklearn.preprocessing import LabelEncoder
 import plotly.graph_objects as go
 from plotly.offline import plot
+import string
 import math
 import numpy as np
 import pandas as pd
@@ -246,6 +247,16 @@ def index(request):
         for i, v in stats.items():
             out_tbs[i] = v.to_html(classes=['dataset'])
 
+        nm = "".join([random.choice(string.ascii_letters) for i in range(10)])
+        writer = pd.ExcelWriter(f'../data/report_{nm}.xlsx', engine='xlsxwriter')
+
+        gen_stat.to_excel(writer, sheet_name=f"General stats")
+
+        for i, site in stats.items():
+            site.to_excel(writer, sheet_name=f"product# {i}")
+
+        writer.save()
+
         x = [f'Product №{i}' for i in gen_df['skutertiaryid'].unique()]
         gen_df['item_def'] = gen_df['soldpieces'] - gen_df['soldpieces'] * gen_df['sold_added']
         gen_df['item_inc'] = gen_df['soldpieces'] * gen_df['sold_added']
@@ -267,7 +278,17 @@ def index(request):
             "gen_stat": gen_stat.to_html(classes=['dataset']),
             "tables": out_tbs,
             "plot": plt_div,
+            "fname": nm
         }
 
         templ = loader.get_template('predictor/prediction.html')
         return HttpResponse(templ.render(va, request))
+
+
+def downloader(request, key=""):
+    file_location = "../data/report_" + key + ".xlsx"
+    with open(file_location, 'rb') as f:
+        file_data = f.read()
+    res = HttpResponse(file_data, content_type='application/vnd.ms-excel')
+    res['Content-Disposition'] = f'attachment; filename="report_{key}.xlsx'
+    return res

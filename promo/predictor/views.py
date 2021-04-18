@@ -220,11 +220,13 @@ def index(request):
         return HttpResponse(templ.render(None, request))
     elif request.method == "POST":
         req = request.POST.get("budget", "0")
+        distrN = float(request.POST.get("distr", 0.1))
         if req == "":
             templ = loader.get_template('predictor/predictor_index.html')
             return HttpResponse(templ.render(None, request))
 
         budget = int(req)
+        distrN = pow(distrN, 4)
 
 
         stats = {}

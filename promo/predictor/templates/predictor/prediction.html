@@ -11,6 +11,14 @@
                 elements[i].style.display = "none";
             }
         }
+        function show(id){
+            if (document.getElementById(id + '_t').style.display == 'block'){
+                hideAll();
+            } else {
+                hideAll();
+                document.getElementById(id + '_t').style.display = 'block';
+            }
+        }
     </script>
     <div class="mt-4"></div>
     {{ gen_stat |safe }}
@@ -19,7 +27,7 @@
         <div class="card mt-2">
             <div class="card-body">
                 <h5 class="card-title">{{ ind }} - details</h5>
-                <a id="{{ ind }}_a" href="#" onclick="hideAll();document.getElementById('{{ ind }}_t').style.display = 'block';return false;">Show details</a>
+                <a id="{{ ind }}_a" href="#" onclick="show('{{ ind }}');return false;">Show details</a>
             </div>
         </div>
         <div id="{{ ind }}_t" class="tbl" style="display: none;">

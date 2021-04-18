@@ -219,18 +219,19 @@ def index(request):
         templ = loader.get_template('predictor/predictor_index.html')
         return HttpResponse(templ.render(None, request))
     elif request.method == "POST":
-        # get inuts
+        req = request.POST.get("budget", "0")
+        if req == "":
+            templ = loader.get_template('predictor/predictor_index.html')
+            return HttpResponse(templ.render(None, request))
 
-        # make predictions
+        budget = int(req)
 
-        budget = int(request.POST.get("budget", 0))
-        distrN = float(request.POST.get("distr", 0))
 
         stats = {}
         gen_df = pd.DataFrame()
 
         for item in lenc.classes_:
-            d = predict(item, int(budget/len(lenc.classes_)), distrN, 100)
+            d = predict(item, int(budget/len(lenc.classes_)), tries=100)
             gen_df = gen_df.append(d)
             stats[item] = d
         gen_stat = pd.DataFrame()
@@ -249,7 +250,7 @@ def index(request):
 
         fig = go.Figure()
         fig.add_trace(go.Bar(x=x, y=gen_df.groupby('skutertiaryid')["item_def"].sum(), name="Default trend"))
-        fig.add_trace(go.Bar(x=x, y=gen_df.groupby('skutertiaryid')["item_inc"].sum(), name="Added sales"))
+        fig.add_trace(go.Bar(x=x, y=gen_df.groupby('skutertiaryid')["item_inc"].sum(), name="Promotion impact"))
         fig.update_layout(
             barmode='stack',
             xaxis_title="Sold pieces",
